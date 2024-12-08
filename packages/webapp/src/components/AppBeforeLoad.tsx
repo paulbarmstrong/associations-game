@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
 import { App } from "./App"
 import { http } from "../utilities/Http"
-import { Round, DynamicWebappConfig, dynamicWebappConfigShape, getRoundResponseShape } from "common"
+import { Round, DynamicWebappConfig, dynamicWebappConfigShape } from "common"
 import { validateDataShape } from "shape-tape"
+import { getRound } from "../utilities/Rounds"
 
 export function AppBeforeLoad() {
 	const [config, setConfig] = useState<DynamicWebappConfig | undefined>(undefined)
@@ -18,17 +19,13 @@ export function AppBeforeLoad() {
 	useEffect(() => {
 		if (config !== undefined) {
 			(async () => {
-				const res = validateDataShape({
-					data: await http(`${config.httpApiEndpoint}/get-round`),
-					shape: getRoundResponseShape
-				})
-				setRound(res.round)
+				setRound(await getRound(config))
 			})()
 		}
 	}, [config])
 
 	if (config !== undefined && round !== undefined) {
-		return <App config={config} round={round}/>
+		return <App config={config} originalRound={round}/>
 	} else {
 		return null
 	}

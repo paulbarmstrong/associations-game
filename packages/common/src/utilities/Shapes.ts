@@ -20,6 +20,10 @@ export const getRoundResponseShape = s.object({
 	round: roundShape
 })
 
+export const completeRoundBodyShape = s.object({
+	id: ulidShape
+})
+
 export const dynamicWebappConfigShape = s.object({
 	httpApiEndpoint: s.string()
 })
