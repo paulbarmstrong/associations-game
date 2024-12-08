@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
 import { App } from "./App"
 import { http } from "../utilities/Http"
-import { DynamicWebappConfig, dynamicWebappConfigShape, listGridItemsResponseShape } from "common"
+import { AssociationsGameRound, DynamicWebappConfig, dynamicWebappConfigShape, getRoundResponseShape } from "common"
 import { validateDataShape } from "shape-tape"
 
 export function AppBeforeLoad() {
 	const [config, setConfig] = useState<DynamicWebappConfig | undefined>(undefined)
-	const [gridItems, setGridItems] = useState<Set<string> | undefined>(undefined)
+	const [round, setRound] = useState<AssociationsGameRound | undefined>(undefined)
 	useEffect(() => {
 		(async () => {
 			setConfig(validateDataShape({
@@ -19,16 +19,16 @@ export function AppBeforeLoad() {
 		if (config !== undefined) {
 			(async () => {
 				const res = validateDataShape({
-					data: await http(`${config.httpApiEndpoint}/list-grid-items`),
-					shape: listGridItemsResponseShape
+					data: await http(`${config.httpApiEndpoint}/get-round`),
+					shape: getRoundResponseShape
 				})
-				setGridItems(new Set(res.gridItems))
+				setRound(res.round)
 			})()
 		}
 	}, [config])
 
-	if (config !== undefined && gridItems !== undefined) {
-		return <App config={config} initialGridItems={gridItems}/>
+	if (config !== undefined && round !== undefined) {
+		return <App config={config} round={round}/>
 	} else {
 		return null
 	}

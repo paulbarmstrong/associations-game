@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import "source-map-support/register"
 import * as cdk from "aws-cdk-lib"
-import { GridStack } from "../lib/stacks/GridStack"
+import { AssociationsGameStack } from "../lib/stacks/AssociationsGameStack"
 
 const app = new cdk.App()
 
-new GridStack(app, "Grid")
+new AssociationsGameStack(app, "AssociationsGame")

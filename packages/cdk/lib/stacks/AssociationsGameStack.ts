@@ -3,46 +3,42 @@ import * as cdk from "aws-cdk-lib"
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb"
 import * as lambda from "aws-cdk-lib/aws-lambda"
 import * as lambda_nodejs from "aws-cdk-lib/aws-lambda-nodejs"
-import * as iam from "aws-cdk-lib/aws-iam"
 import * as apigw from "aws-cdk-lib/aws-apigatewayv2"
 import * as apigwinteg from "aws-cdk-lib/aws-apigatewayv2-integrations"
+import * as route53 from "aws-cdk-lib/aws-route53"
 import { AssetWithBuild, StaticWebsite } from "@paulbarmstrong/cdk-static-website-from-asset"
 import { DynamicWebappConfig } from "common"
+import "dotenv/config"
 
-export class GridStack extends cdk.Stack {
+export class AssociationsGameStack extends cdk.Stack {
 	constructor(scope: Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props)
 
-		const gridItemsTable = new dynamodb.Table(this, "GridItemsTable", {
-			tableName: "GridItems",
+		const hostedZone: route53.IHostedZone | undefined = process.env.HOSTED_ZONE_ID !== undefined && process.env.HOSTED_ZONE_NAME !== undefined ? (
+			route53.HostedZone.fromHostedZoneAttributes(this, "HostedZone", {
+				hostedZoneId: process.env.HOSTED_ZONE_ID,
+				zoneName: process.env.HOSTED_ZONE_NAME
+			})
+		) : (
+			undefined
+		)
+		const domainName: string | undefined = process.env.DOMAIN_NAME
+
+		const associationsGameRoundsTable = new dynamodb.Table(this, "AssociationsGameRoundsTable", {
+			tableName: "AssociationsGameRounds",
 			billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-			partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
-			// PLEASE do not use RemovalPolicy.DESTROY on a table containing anything of substance!
-			removalPolicy: cdk.RemovalPolicy.DESTROY
+			partitionKey: { name: "partition", type: dynamodb.AttributeType.NUMBER },
+			sortKey: { name: "id", type: dynamodb.AttributeType.STRING }
 		})
 
 		const httpApiFunction = new lambda_nodejs.NodejsFunction(this, "HttpApiFunction", {
 			runtime: lambda.Runtime.NODEJS_20_X,
 			entry: "../http-api/src/index.ts",
 		})
-		httpApiFunction.addToRolePolicy(new iam.PolicyStatement({
-			actions: [
-				"dynamodb:GetItem",
-				"dynamodb:DeleteItem",
-				"dynamodb:PutItem",
-				"dynamodb:Scan",
-				"dynamodb:Query",
-				"dynamodb:UpdateItem",
-				"dynamodb:BatchWriteItem",
-				"dynamodb:BatchGetItem",
-				"dynamodb:DescribeTable",
-				"dynamodb:ConditionCheckItem"
-			],
-			resources: [gridItemsTable.tableArn, `${gridItemsTable.tableArn}/*`]
-		}))
+		associationsGameRoundsTable.grantReadWriteData(httpApiFunction)
 
 		const httpApi = new apigw.HttpApi(this, "HttpApi", {
-			apiName: "GridHttpApi",
+			apiName: "AssociationsGameHttpApi",
 			corsPreflight: {
 				allowHeaders: [
 					"Content-Type",
@@ -78,7 +74,8 @@ export class GridStack extends cdk.Stack {
 		})
 		
 		const website = new StaticWebsite(this, "Website", {
-			asset: websiteAsset
+			asset: websiteAsset,
+			domains: hostedZone !== undefined && domainName !== undefined ? [{ hostedZone, domainName }] : undefined
 		})
 		const dynamicWebappConfig: DynamicWebappConfig = {
 			httpApiEndpoint: httpApi.apiEndpoint

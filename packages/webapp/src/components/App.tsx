@@ -1,57 +1,57 @@
-import { MouseEvent, useState } from "react"
-import { BACKGROUND_SHADE_T1, GRID_ITEM_SIZE_PX } from "../utilities/Constants"
-import { DynamicWebappConfig } from "common"
-import { http } from "../utilities/Http"
+import { useRef, useState } from "react"
+import { BACKGROUND_SHADE_T1 } from "../utilities/Constants"
+import { AssociationsGameRound, DynamicWebappConfig } from "common"
 import { useWindowSize } from "../hooks/useWindowSize"
+import { shuffle } from "lodash"
 
 interface Props {
 	config: DynamicWebappConfig,
-	initialGridItems: Set<string>
+	round: AssociationsGameRound
 }
 
 export function App(props: Props) {
 	useWindowSize()
-	const numRows = Math.floor(window.innerHeight / GRID_ITEM_SIZE_PX)
-	const numColumns = Math.floor(window.innerWidth / GRID_ITEM_SIZE_PX)
-	const [gridItems, setGridItems] = useState<Set<string>>(props.initialGridItems)
+	const gridElement = useRef<HTMLDivElement>(null)
+	const [words, setWords] = useState<Array<string>>(shuffle(props.round.categories.flatMap(category => category.words)))
+	const [selectedWords, setSelectedWords] = useState<Set<string>>(new Set())
+	const [finishedCategories, setFinishedCategories] = useState<Array<string>>([])
 
-	function onGridMouseDown(event: MouseEvent<HTMLDivElement>) {
-		const actualGridItemWidth = window.innerWidth / numColumns
-		const actualGridItemHeight = window.innerHeight / numRows
-
-		const x = Math.ceil(event.clientX / actualGridItemWidth)
-		const y = Math.ceil(event.clientY / actualGridItemHeight)
-		const newGridItems = new Set(gridItems)
-		if (!gridItems.has(`${x},${y}`)) {
-			newGridItems.add(`${x},${y}`)
-			http(`${props.config.httpApiEndpoint}/create-grid-item`, {
-				method: "POST",
-				body: JSON.stringify({ id: `${x},${y}` })
-			})
+	function onClickWord(word: string) {
+		const newSelectedWords = new Set(selectedWords)
+		if (newSelectedWords.has(word)) {
+			newSelectedWords.delete(word)
 		} else {
-			newGridItems.delete(`${x},${y}`)
-			http(`${props.config.httpApiEndpoint}/delete-grid-item`, {
-				method: "POST",
-				body: JSON.stringify({ id: `${x},${y}` })
-			})
+			newSelectedWords.add(word)
 		}
-		setGridItems(newGridItems)
+		setSelectedWords(newSelectedWords)
 	}
 
-	return <div>
-		<div style={{position: "absolute", display: "grid", width: "100%", height: "100%", zIndex: 1,
-			gridTemplateColumns: `repeat(${numColumns}, minmax(0, 1fr))`,
-			gridTemplateRows: `repeat(${numRows}, minmax(0, 1fr))`
-		}} onMouseDown={onGridMouseDown} onContextMenu={e => e.preventDefault()}>
+	return <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: 20, gap: 20}}>
+		<div style={{fontSize: "large"}}>Associations Game</div>
+		<div ref={gridElement} style={{display: "grid", width: "50vw", height: "50vh",
+			gridTemplateColumns: `repeat(${4}, minmax(0, 1fr))`,
+			gridTemplateRows: `repeat(${4}, minmax(0, 1fr))`
+		}} onContextMenu={e => e.preventDefault()}>
 			{
-				Array.from(gridItems).map(gridItem => {
-					const [x, y] = gridItem.split(",")
-					return <div key={gridItem} style={{gridColumn: x, gridRow: y, backgroundColor: BACKGROUND_SHADE_T1, borderRadius: 4}}></div>
+				words.map((word, index) => {
+					return <div key={word} style={{
+						gridColumn: (index % 4)+1,
+						gridRow: (Math.floor(index / 4))+1,
+						backgroundColor: BACKGROUND_SHADE_T1,
+						borderRadius: 4,
+						margin: 5,
+						display: "flex",
+						justifyContent: "center",
+						alignItems: "center",
+						borderStyle: selectedWords.has(word) ? "solid" : "none",
+						borderColor: "white",
+						borderWidth: 2,
+						userSelect: "none"
+					}} onMouseDown={() => onClickWord(word)}>
+						{word}
+					</div>
 				})
 			}
 		</div>
-		<div style={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
-			fontSize: Math.min(window.innerWidth, window.innerHeight)/3, color: BACKGROUND_SHADE_T1,
-			opacity: 0.5, userSelect: "none"}}>GRID</div>
 	</div>
 }

@@ -1,7 +1,7 @@
 {
 	"name": "http-api",
 	"version": "1.0.0",
-	"license": "Unlicense",
+	"license": "MIT",
 	"main": "index.ts",
 	"devDependencies": {
 		"@types/aws-lambda": "^8.10.115"
@@ -12,6 +12,7 @@
 		"@aws-sdk/s3-presigned-post": "^3.395.0",
 		"common": "*",
 		"optimus-ddb-client": "1.0.43",
-		"shape-tape": "^1.0.22"
+		"shape-tape": "^1.0.22",
+		"ulid": "^2.3.0"
 	}
 }

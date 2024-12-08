@@ -1,17 +1,20 @@
 import { s } from "shape-tape"
+import { ULID_REGEX } from "../Constants"
 
-export const gridItemIdShape = s.string({ pattern: /^[0-9]+,[0-9]+$/ })
+export const ulidShape = s.string({pattern: ULID_REGEX()})
 
-export const gridItemShape = s.object({
-	id: gridItemIdShape
+export const associationsGameRoundShape = s.object({
+	partition: s.literal(0),
+	id: ulidShape,
+	completed: s.boolean(),
+	categories: s.array(s.object({
+		name: s.string(),
+		words: s.array(s.string())
+	}))
 })
 
-export const listGridItemsBodyShape = s.object({
-	nextToken: s.optional(s.string())
-})
-
-export const listGridItemsResponseShape = s.object({
-	gridItems: s.array(gridItemIdShape)
+export const getRoundResponseShape = s.object({
+	round: associationsGameRoundShape
 })
 
 export const dynamicWebappConfigShape = s.object({
