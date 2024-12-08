@@ -6,6 +6,7 @@ import * as lambda_nodejs from "aws-cdk-lib/aws-lambda-nodejs"
 import * as apigw from "aws-cdk-lib/aws-apigatewayv2"
 import * as apigwinteg from "aws-cdk-lib/aws-apigatewayv2-integrations"
 import * as route53 from "aws-cdk-lib/aws-route53"
+import * as iam from "aws-cdk-lib/aws-iam"
 import { AssetWithBuild, StaticWebsite } from "@paulbarmstrong/cdk-static-website-from-asset"
 import { DynamicWebappConfig } from "common"
 import "dotenv/config"
@@ -36,6 +37,10 @@ export class AssociationsGameStack extends cdk.Stack {
 			entry: "../http-api/src/index.ts",
 		})
 		associationsGameRoundsTable.grantReadWriteData(httpApiFunction)
+		httpApiFunction.addToRolePolicy(new iam.PolicyStatement({
+			actions: ["bedrock:InvokeModel"],
+			resources: ["*"]
+		}))
 
 		const httpApi = new apigw.HttpApi(this, "HttpApi", {
 			apiName: "AssociationsGameHttpApi",
