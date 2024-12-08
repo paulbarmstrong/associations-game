@@ -14,6 +14,7 @@
 		"common": "*",
 		"optimus-ddb-client": "1.0.43",
 		"shape-tape": "^1.0.22",
-		"ulid": "^2.3.0"
+		"ulid": "^2.3.0",
+		"lodash": "^4.17.21"
 	}
 }

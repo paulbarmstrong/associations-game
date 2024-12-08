@@ -10,5 +10,7 @@ export async function askNova(prompt: String): Promise<string> {
 	}))
 	const resJson = JSON.parse(Buffer.from(res.body).toString())
 	if (resJson.stopReason !== "end_turn") throw new Error(`Encountered stop reason: "${resJson.stopReason}".`)
-	return resJson.output.message.content.map(content => content.text).join("\n")
+	const answer = resJson.output.message.content.map(content => content.text).join("\n")
+	console.log(`Asked nova: ${JSON.stringify({ prompt, answer })}`)
+	return answer
 }

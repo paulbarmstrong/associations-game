@@ -35,6 +35,7 @@ export class AssociationsGameStack extends cdk.Stack {
 		const httpApiFunction = new lambda_nodejs.NodejsFunction(this, "HttpApiFunction", {
 			runtime: lambda.Runtime.NODEJS_20_X,
 			entry: "../http-api/src/index.ts",
+			timeout: cdk.Duration.seconds(10)
 		})
 		associationsGameRoundsTable.grantReadWriteData(httpApiFunction)
 		httpApiFunction.addToRolePolicy(new iam.PolicyStatement({

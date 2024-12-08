@@ -1,12 +1,12 @@
 import { useRef, useState } from "react"
-import { BACKGROUND_SHADE_T1, MENU_WIDTH } from "../utilities/Constants"
+import { MENU_WIDTH } from "../utilities/Constants"
 import { Category, DynamicWebappConfig, Round } from "common"
 import { useWindowSize } from "../hooks/useWindowSize"
 import { isEqual, shuffle } from "lodash"
-import { getCategoryColor } from "../utilities/Color"
 import { completeRound, getRound } from "../utilities/Rounds"
 import { useError } from "../hooks/useError"
 import { Toast } from "./Toast"
+import { getShade } from "../utilities/Color"
 
 interface Props {
 	config: DynamicWebappConfig,
@@ -63,7 +63,7 @@ export function App(props: Props) {
 	}
 
 	const gridItemStyle = {
-		backgroundColor: BACKGROUND_SHADE_T1,
+		backgroundColor: getShade(1),
 		borderRadius: 4,
 		display: "flex",
 		justifyContent: "center",
@@ -94,9 +94,9 @@ export function App(props: Props) {
 						gridColumnStart: 1,
 						gridColumnEnd: 5,
 						gridRow: (index)+1,
-						backgroundColor: getCategoryColor(category)
+						backgroundColor: getShade(-2)
 					}}>{
-						`${category.name}`
+						`${category.emoji} ${category.name}`
 					}</div>
 				})
 			}

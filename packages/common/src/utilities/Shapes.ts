@@ -5,7 +5,7 @@ export const ulidShape = s.string({pattern: ULID_REGEX()})
 
 export const categoryShape = s.object({
 	name: s.string(),
-	hue: s.integer({ min: 0, max: 360 }),
+	emoji: s.string(),
 	words: s.array(s.string())
 })
 
