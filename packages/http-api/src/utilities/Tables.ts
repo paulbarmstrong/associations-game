@@ -1,9 +1,9 @@
-import { associationsGameRoundShape } from "common"
+import { roundShape } from "common"
 import { Table } from "optimus-ddb-client"
 
-export const associationsGameRoundsTable = new Table({
+export const roundsTable = new Table({
 	tableName: "AssociationsGameRounds",
-	itemShape: associationsGameRoundShape,
+	itemShape: roundShape,
 	partitionKey: "partition",
 	sortKey: "id"
 })

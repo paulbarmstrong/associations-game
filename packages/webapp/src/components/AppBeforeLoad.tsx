@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
 import { App } from "./App"
 import { http } from "../utilities/Http"
-import { AssociationsGameRound, DynamicWebappConfig, dynamicWebappConfigShape, getRoundResponseShape } from "common"
+import { Round, DynamicWebappConfig, dynamicWebappConfigShape, getRoundResponseShape } from "common"
 import { validateDataShape } from "shape-tape"
 
 export function AppBeforeLoad() {
 	const [config, setConfig] = useState<DynamicWebappConfig | undefined>(undefined)
-	const [round, setRound] = useState<AssociationsGameRound | undefined>(undefined)
+	const [round, setRound] = useState<Round | undefined>(undefined)
 	useEffect(() => {
 		(async () => {
 			setConfig(validateDataShape({
