@@ -68,7 +68,11 @@ export function App(props: Props) {
 		display: "flex",
 		justifyContent: "center",
 		alignItems: "center",
-		userSelect: "none" as "none"
+		textAlign: "center" as "center",
+		userSelect: "none" as "none",
+		overflowWrap: "break-word" as "break-word",
+		wordWrap: "break-word" as "break-word",
+		hyphens: "auto" as "auto"
 	}
 
 	const isComboTried = triedCombinations.find(combination => isEqual(Array.from(selectedWords).sort(), Array.from(combination).sort())) !== undefined
@@ -94,10 +98,14 @@ export function App(props: Props) {
 						gridColumnStart: 1,
 						gridColumnEnd: 5,
 						gridRow: (index)+1,
-						backgroundColor: getShade(-2)
-					}}>{
-						`${category.emoji} ${category.name}`
-					}</div>
+						backgroundColor: getShade(-2),
+						flexDirection: "column",
+						gap: 5,
+						userSelect: undefined
+					}}>
+						<span style={{fontWeight: "bold"}}>{category.emoji} {category.name}</span>
+						<span>{`(${category.words.join(", ")})`}</span>
+					</div>
 				})
 			}
 			{
