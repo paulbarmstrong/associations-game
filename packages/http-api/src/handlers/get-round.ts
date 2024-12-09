@@ -50,17 +50,22 @@ async function generateNewRound(optimus: OptimusDdbClient): Promise<Round> {
 	})
 
 	const categories: Array<Category> = take(shuffle([...regularCategories, ...phraseCategories.map(category => ({
-		name: category.name,
+		name: `Phrases with "${category.name}"`,
 		emoji: category.emoji,
 		words: category.phrases.map(phrase => {
 			const match = phrase.split(" ").map(word => word.toLowerCase()).find(word => word !== category.name.toLowerCase())
 			if (match === undefined) throw new Error(`Uncoercable phrase category: ${JSON.stringify(category)}`)
-			return match
+			return match.replaceAll(category.name, "")
 		})
 	}))]), 4)
 	if (categories.length < 4) throw new Error(`Got ${categories.length} categories.`)
 	categories.forEach(category => category.name = capitalize(category.name.toLowerCase()))
 	categories.forEach(category => category.words = category.words.map(word => word.toLowerCase()))
+	const words = categories.flatMap(category => category.words)
+	words.forEach(word => {
+		if (word.length === 0) throw new Error("Got zero-length word.")
+	})
+	if (new Set(words).size !== words.length) throw new Error(`Only got ${new Set(words).size} unique words.`)
 	return {
 		partition: 0,
 		id: ulid(),
