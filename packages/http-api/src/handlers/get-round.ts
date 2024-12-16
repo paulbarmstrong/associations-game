@@ -55,7 +55,7 @@ async function generateNewRound(optimus: OptimusDdbClient): Promise<Round> {
 		words: category.phrases.map(phrase => {
 			const match = phrase.split(" ").map(word => word.toLowerCase()).find(word => word !== category.name.toLowerCase())
 			if (match === undefined) throw new Error(`Uncoercable phrase category: ${JSON.stringify(category)}`)
-			return match.replaceAll(category.name, "")
+			return match.replaceAll(category.name.toLowerCase(), "")
 		})
 	}))]), 4)
 	if (categories.length < 4) throw new Error(`Got ${categories.length} categories.`)
