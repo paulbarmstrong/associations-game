@@ -1,12 +1,8 @@
-import { validateDataShape } from "shape-tape"
 import { http } from "./Http"
-import { DynamicWebappConfig, getRoundResponseShape, Round } from "common"
+import { DynamicWebappConfig, Round, zodValidate, getRoundResponseZod } from "common"
 
 export async function getRound(config: DynamicWebappConfig): Promise<Round> {
-	return validateDataShape({
-		data: await http(`${config.httpApiEndpoint}/get-round`),
-		shape: getRoundResponseShape
-	}).round
+	return zodValidate(getRoundResponseZod, await http(`${config.httpApiEndpoint}/get-round`)).round
 }
 
 export async function completeRound(config: DynamicWebappConfig, id: string): Promise<void> {

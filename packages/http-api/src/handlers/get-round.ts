@@ -1,11 +1,11 @@
 import { OptimusDdbClient } from "optimus-ddb-client"
 import { HttpApiEvent } from "../utilities/Http"
-import { Category, categoryShape, GetRoundResponse, Round } from "common"
+import { Category, categoryZod, GetRoundResponse, Round, zodValidate } from "common"
 import { roundsTable } from "../utilities/Tables"
 import { ulid } from "ulid"
-import { s, validateDataShape } from "shape-tape"
 import { askNova } from "../utilities/Nova"
 import { capitalize, shuffle, take } from "lodash"
+import * as z from "zod"
 
 export async function getRound(event: HttpApiEvent, optimus: OptimusDdbClient): Promise<GetRoundResponse> {
 	const [rounds] = await optimus.queryItems({
@@ -43,11 +43,11 @@ async function generateNewRound(optimus: OptimusDdbClient): Promise<Round> {
 		await askNova(`Please choose ${numRegularCategories} random categories or topics that are not in ${JSON.stringify(previousCategories)}. Please choose words that really only fit into their topic. Please provide the topics as a JSON array of objects, where objects have the topic name 'name', the most closely related emoji 'emoji', and four random words related to the topic 'words'. Please dont include anything else in your response.`),
 		await askNova(`Please think of ${numPhaseCategories} keywords, where each keyword is a single word that has four two-word phrases that all contain the keyword. Please choose keywords that aren't in ${JSON.stringify(previousCategories)}. Please output it as a JSON array of objects where each object has the keyword 'name', the most closely related emoji 'emoji', and the four two-word-phrases 'phrases'. Please dont include anything else in your response.`)
 	])
-	const regularCategories = validateDataShape({ data: JSON.parse(regularCategoriesResponse), shape: s.array(categoryShape) })
-	const phraseCategories = validateDataShape({
-		data: JSON.parse(phraseCategoriesResponse),
-		shape: s.array(s.object({ name: s.string(), emoji: s.string(), phrases: s.array(s.string()) }))
-	})
+	const regularCategories = zodValidate(z.array(categoryZod), JSON.parse(regularCategoriesResponse))
+	const phraseCategories = zodValidate(
+		z.array(z.strictObject({ name: z.string(), emoji: z.string(), phrases: z.array(z.string()) })),
+		JSON.parse(phraseCategoriesResponse),
+	)
 
 	const categories: Array<Category> = take(shuffle([...regularCategories, ...phraseCategories.map(category => ({
 		name: `Phrases with "${category.name}"`,
