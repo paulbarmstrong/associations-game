@@ -7,6 +7,7 @@ import { completeRound, getRound } from "../utilities/Rounds"
 import { useError } from "../hooks/useError"
 import { Toast } from "./Toast"
 import { getShade } from "../utilities/Color"
+import { LoadingSpinner } from "./LoadingSpinner"
 
 interface Props {
 	config: DynamicWebappConfig,
@@ -17,6 +18,7 @@ export function App(props: Props) {
 	useWindowSize()
 
 	const [error, setError, withError] = useError()
+	const [loading, setLoading] = useState<boolean>(false)
 	const [round, setRound] = useState<Round>(props.originalRound)
 	const gridElement = useRef<HTMLDivElement>(null)
 	const [words, setWords] = useState<Array<string>>(shuffle(round.categories.flatMap(category => category.words)))
@@ -37,7 +39,9 @@ export function App(props: Props) {
 	async function onClickSubmit() {
 		await withError(async () => {
 			if (words.length === 0) {
+				setLoading(true)
 				const newRound = await getRound(props.config)
+				setLoading(false)
 				setRound(newRound)
 				setWords(shuffle(newRound.categories.flatMap(category => category.words)))
 				setSelectedWords(new Set())
@@ -132,11 +136,12 @@ export function App(props: Props) {
 					fontWeight: "bold",
 					cursor: words.length === 0 || (selectedWords.size === 4 && !isComboTried) ? "pointer" : undefined,
 					color: words.length === 0 || (selectedWords.size === 4 && !isComboTried) ? undefined : "grey",
+					padding: 10
 				}} onClick={onClickSubmit}>{
 					words.length > 0 ? (
 						selectedWords.size === 4 ? (isComboTried ? "ALREADY TRIED" : "SUBMIT") : `${selectedWords.size}/4 WORDS SELECTED`
 					) : (
-						"NEXT ROUND"
+						loading ? <LoadingSpinner/> : "NEXT ROUND"
 					)
 				}</div>
 			}
