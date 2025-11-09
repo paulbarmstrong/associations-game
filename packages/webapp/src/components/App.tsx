@@ -81,6 +81,8 @@ export function App(props: Props) {
 
 	const isComboTried = triedCombinations.find(combination => isEqual(Array.from(selectedWords).sort(), Array.from(combination).sort())) !== undefined
 
+	const isSubmitClickable = !loading && (words.length === 0 || (selectedWords.size === 4 && !isComboTried))
+
 	return <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: 20, gap: 20}}>
 		<div style={{fontSize: "x-large"}}>Associations Game</div>
 		{
@@ -97,7 +99,7 @@ export function App(props: Props) {
 		}} onContextMenu={e => e.preventDefault()}>
 			{
 				finishedCategories.map((category, index) => {
-					return <div style={{
+					return <div key={category.name} style={{
 						...gridItemStyle,
 						gridColumnStart: 1,
 						gridColumnEnd: 5,
@@ -127,24 +129,22 @@ export function App(props: Props) {
 					</div>
 				})
 			}
-			{
-				<div style={{
-					...gridItemStyle,
-					gridColumnStart: 1,
-					gridColumnEnd: 5,
-					gridRow: 5,
-					fontWeight: "bold",
-					cursor: words.length === 0 || (selectedWords.size === 4 && !isComboTried) ? "pointer" : undefined,
-					color: words.length === 0 || (selectedWords.size === 4 && !isComboTried) ? undefined : "grey",
-					padding: 10
-				}} onClick={onClickSubmit}>{
-					words.length > 0 ? (
-						selectedWords.size === 4 ? (isComboTried ? "ALREADY TRIED" : "SUBMIT") : `${selectedWords.size}/4 WORDS SELECTED`
-					) : (
-						loading ? <LoadingSpinner/> : "NEXT ROUND"
-					)
-				}</div>
-			}
+			<div style={{
+				...gridItemStyle,
+				gridColumnStart: 1,
+				gridColumnEnd: 5,
+				gridRow: 5,
+				fontWeight: "bold",
+				cursor: isSubmitClickable ? "pointer" : undefined,
+				color: isSubmitClickable ? undefined : "grey",
+				padding: 10
+			}} onClick={isSubmitClickable ? onClickSubmit : undefined}>{
+				words.length > 0 ? (
+					selectedWords.size === 4 ? (isComboTried ? "ALREADY TRIED" : "SUBMIT") : `${selectedWords.size}/4 WORDS SELECTED`
+				) : (
+					loading ? <LoadingSpinner/> : "NEXT ROUND"
+				)
+			}</div>
 		</div>
 	</div>
 }
