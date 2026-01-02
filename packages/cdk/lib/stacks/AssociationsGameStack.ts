@@ -33,7 +33,7 @@ export class AssociationsGameStack extends cdk.Stack {
 		})
 
 		const httpApiFunction = new lambda_nodejs.NodejsFunction(this, "HttpApiFunction", {
-			runtime: lambda.Runtime.NODEJS_20_X,
+			runtime: lambda.Runtime.NODEJS_24_X,
 			entry: "../http-api/src/index.ts",
 			timeout: cdk.Duration.seconds(10)
 		})
